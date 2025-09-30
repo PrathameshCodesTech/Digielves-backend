@@ -25,21 +25,13 @@ from datetime import datetime, date, time
 import uuid
 
 
-# class UserManager(BaseUserManager):
-#     use_in_migrations = True
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
     
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
-        email = self.normalize_email(email.lower())
-        
-        # Set required fields if not provided
-        extra_fields.setdefault('user_role', 'employee')
-        extra_fields.setdefault('user_type', 'employee')
-        
+        email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -49,15 +41,14 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('active', True)
-        extra_fields.setdefault('user_role', 'admin')
-        extra_fields.setdefault('user_type', 'admin')
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-            
+        
         return self.create_user(email, password, **extra_fields)
+    
 
 class AutoDateTimeField(models.DateTimeField):
     def pre_save(self, model_instance, add):
@@ -73,34 +64,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_role           = models.CharField(max_length=25,null=False,blank=False)
     user_type           = models.CharField(max_length=25,null=False,blank=False)
     verified            = models.CharField(max_length= 20, null=True, blank=True, choices = ((2, "2"),(1, "1"),(0, "0")) , default =0)
-    external_user_id    = models.PositiveIntegerField(blank=True, null=True, unique= True)
-    active              = models.BooleanField(default=True)
+    active              = models.BooleanField(default=True)  
+    created_at          = models.DateTimeField(default=timezone.now)
     is_staff            = models.BooleanField(default=False)
     is_superuser        = models.BooleanField(default=False)
-    created_at          = models.DateTimeField(default=timezone.now)
     updated_at          = AutoDateTimeField(default=timezone.now)
     
     objects = UserManager()
     USERNAME_FIELD='email'
     REQUIRED_FIELDS=[]
     
-    # def save(self, *args, **kwargs):
-    #     self.email = self.email.lower()  # Convert email to lowercase before saving
-    #     super().save(*args, **kwargs)
-    
-    @property
-    def is_active(self):
-        return self.active
-    
-    def has_perm(self, perm, obj=None):
-        return self.is_superuser
-    
-    def has_module_perms(self, app_label):
-        return self.is_superuser
-    
     def save(self, *args, **kwargs):
         self.email = self.email.lower()  # Convert email to lowercase before saving
         super().save(*args, **kwargs)
+    
 
 class Address(models.Model):
     user_id             = models.ForeignKey(User,on_delete=models.CASCADE, max_length=10,null=False,blank=False, unique=True)
@@ -120,7 +97,7 @@ class OrganizationDetails(models.Model):
     # user_id             = models.ForeignKey(User,on_delete=models.CASCADE,max_length=10, null=False, blank=False, unique=True,validators=[validate_user])
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, max_length=10, null=False, blank=False, unique=True)
 
-    name                = models.CharField(max_length=50, null=True,blank=True, validators=[is_valid_name])
+    name                = models.CharField(max_length=50, null=True,blank=True)
     support_mail        = models.EmailField(max_length=50, null=True, blank=True)
     number_of_employee  = models.IntegerField(max_length=12, null=True,blank=True,default=0)
     number_of_subscription      = models.IntegerField(max_length=12, null=True,blank=True)  

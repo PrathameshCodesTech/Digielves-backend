@@ -29,11 +29,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!-saf7kiv4e$#)+*%%r12=#69ln2u_4x1tdy5b&$kq(2-!0u9k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['https://ordinet.store','ordinet.store', '*' ]
 AUTH_USER_MODEL = 'digielves_setup.User'
 CORS_ALLOW_ALL_ORIGINS=True
+CORS_ALLOW_CREDENTIALS = True
 
 
 SESSION_COOKIE_SECURE = True
@@ -66,9 +67,7 @@ CORS_ORIGIN_WHITELIST = [
 
 
 
-# settings.py
 
-# Celery Configuration
 CELERY_BROKER_URL = "redis://13.127.144.141:6379"
 CELERY_RESULT_BACKEND = "redis://13.127.144.141:6379"
 
@@ -96,7 +95,11 @@ CORS_ALLOW_METHODS = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'https://ordinet.store' # Add the origin(s) you want to allow
+    'https://ordinet.store', # Add the origin(s) you want to allow
+    'http://localhost:5173',  # React dev server
+    'http://127.0.0.1:5173',
+    'http://localhost:8080',  # If using different port
+    'http://127.0.0.1:8080',
 ]
 
 SIMPLE_JWT = {
@@ -399,6 +402,12 @@ USE_TZ = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Add this to ensure admin static files are collected
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),

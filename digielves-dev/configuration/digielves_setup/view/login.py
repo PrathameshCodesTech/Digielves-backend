@@ -59,17 +59,20 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.generics import GenericAPIView
 from django.core.cache import cache
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from configuration.send_otp import sendMailOtp,sendMobileOtp
  
 import random
 
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class LogInClass(viewsets.ModelViewSet):
-
+    print('idher pucha')
     # authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
+    print('trying here')
     throttle_classes = [AnonRateThrottle,UserRateThrottle]
 
     serializer_class = UserLoginSeriallizer
@@ -78,7 +81,13 @@ class LogInClass(viewsets.ModelViewSet):
 
     # Client Registration API 
     def logIn(self,request):
-        print(request.data)
+        print("=== LOGIN DEBUG START ===")
+        print(f"Request method: {request.method}")
+        print(f"Request content type: {request.content_type}")
+        print(f"Request data: {request.data}")
+        print(f"Request POST: {request.POST}")
+        print(f"Request body: {request.body}")
+        print("=== LOGIN DEBUG END ===")
         try:
             with open('useful.csv') as f:
                 reader = csv.reader(f)
